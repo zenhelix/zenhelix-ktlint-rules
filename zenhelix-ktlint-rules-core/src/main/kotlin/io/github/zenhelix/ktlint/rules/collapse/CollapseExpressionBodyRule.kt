@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.collapse
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -46,6 +48,12 @@ import io.github.zenhelix.ktlint.rules.shiftIndent
  */
 public class CollapseExpressionBodyRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:collapse-expression-body"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_FUNCTION_EXPRESSION_BODY_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -209,4 +217,7 @@ public class CollapseExpressionBodyRule : ZenhelixRule(
             .forEach { it.shiftIndent(shift) }
     }
 
+    private companion object {
+        val STANDARD_FUNCTION_EXPRESSION_BODY_RULE_ID = RuleId("standard:function-expression-body")
+    }
 }

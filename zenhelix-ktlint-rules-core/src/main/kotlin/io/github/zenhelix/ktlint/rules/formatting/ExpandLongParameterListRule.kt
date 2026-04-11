@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.formatting
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import com.pinterest.ktlint.rule.engine.core.api.upsertWhitespaceAfterMe
 import com.pinterest.ktlint.rule.engine.core.api.upsertWhitespaceBeforeMe
@@ -35,6 +37,12 @@ import io.github.zenhelix.ktlint.rules.textAfterNodeOnSameLine
  */
 public class ExpandLongParameterListRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:expand-long-parameter-list"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_PARAMETER_LIST_WRAPPING_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -191,5 +199,9 @@ public class ExpandLongParameterListRule : ZenhelixRule(
                 val replacement = if (allFitOnOneLine) " " else "\n$paramIndent"
                 (ws as LeafPsiElement).rawReplaceWithText(replacement)
             }
+    }
+
+    private companion object {
+        val STANDARD_PARAMETER_LIST_WRAPPING_RULE_ID = RuleId("standard:parameter-list-wrapping")
     }
 }

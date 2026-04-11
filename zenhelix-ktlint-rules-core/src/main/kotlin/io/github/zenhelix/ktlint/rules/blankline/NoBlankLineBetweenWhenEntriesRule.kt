@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.blankline
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -46,6 +48,12 @@ import io.github.zenhelix.ktlint.rules.replaceBlankLineWithSingleNewline
  */
 public class NoBlankLineBetweenWhenEntriesRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:no-blank-line-between-when-entries"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_BLANK_LINE_BETWEEN_WHEN_CONDITIONS_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -67,5 +75,9 @@ public class NoBlankLineBetweenWhenEntriesRule : ZenhelixRule(
         emitAndCorrect(emit, node.startOffset, "Blank line between when entries with single-line conditions should be removed") {
             node.replaceBlankLineWithSingleNewline()
         }
+    }
+
+    private companion object {
+        val STANDARD_BLANK_LINE_BETWEEN_WHEN_CONDITIONS_RULE_ID = RuleId("standard:blank-line-between-when-conditions")
     }
 }

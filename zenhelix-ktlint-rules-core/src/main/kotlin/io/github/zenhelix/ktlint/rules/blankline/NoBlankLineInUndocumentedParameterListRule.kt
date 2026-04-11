@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.blankline
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -23,6 +25,12 @@ import io.github.zenhelix.ktlint.rules.replaceBlankLineWithSingleNewline
  */
 public class NoBlankLineInUndocumentedParameterListRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:no-blank-line-in-undocumented-parameter-list"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_NO_BLANK_LINE_IN_LIST_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -74,4 +82,7 @@ public class NoBlankLineInUndocumentedParameterListRule : ZenhelixRule(
         }
     }
 
+    private companion object {
+        val STANDARD_NO_BLANK_LINE_IN_LIST_RULE_ID = RuleId("standard:no-blank-line-in-list")
+    }
 }

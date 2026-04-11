@@ -9,8 +9,6 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.linePrefix
 
-private val STANDARD_ANNOTATION_RULE_ID = RuleId("standard:annotation")
-
 /**
  * When the primary constructor has an annotation (e.g. `@PublishedApi internal constructor()`),
  * keeps it on the same line as the class declaration instead of wrapping to a new line.
@@ -72,5 +70,9 @@ public class CollapseConstructorAnnotationRule : ZenhelixRule(
                 .filter { it.elementType == TokenType.WHITE_SPACE && it.text.contains('\n') }
                 .forEach { ws -> (ws as LeafPsiElement).rawReplaceWithText(" ") }
         }
+    }
+
+    private companion object {
+        val STANDARD_ANNOTATION_RULE_ID = RuleId("standard:annotation")
     }
 }

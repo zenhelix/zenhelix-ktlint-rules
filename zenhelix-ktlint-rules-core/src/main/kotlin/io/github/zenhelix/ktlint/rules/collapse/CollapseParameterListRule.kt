@@ -23,13 +23,11 @@ import io.github.zenhelix.ktlint.rules.isEnumClass
  * Collapses multiline parameter lists to a single line when they fit within max line length.
  * Skips parameter lists where parameters have KDoc comments.
  */
-private val FUNCTION_EXPRESSION_BODY_RULE_ID = RuleId("standard:function-expression-body")
-
 public class CollapseParameterListRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:collapse-parameter-list"),
     visitorModifiers = setOf(
         VisitorModifier.RunAfterRule(
-            ruleId = FUNCTION_EXPRESSION_BODY_RULE_ID,
+            ruleId = STANDARD_FUNCTION_EXPRESSION_BODY_RULE_ID,
             mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
         ),
     ),
@@ -97,6 +95,7 @@ public class CollapseParameterListRule : ZenhelixRule(
     }
 
     private companion object {
+        val STANDARD_FUNCTION_EXPRESSION_BODY_RULE_ID = RuleId("standard:function-expression-body")
 
         val MODIFIER_KEYWORDS: TokenSet = TokenSet.create(
             KtTokens.PUBLIC_KEYWORD,

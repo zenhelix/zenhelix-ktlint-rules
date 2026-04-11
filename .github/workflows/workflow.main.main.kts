@@ -26,8 +26,6 @@ import io.github.typesafegithub.workflows.actions.petermurray.WorkflowApplicatio
 import io.github.typesafegithub.workflows.domain.Mode.Write
 import io.github.typesafegithub.workflows.domain.Permission.Contents
 import io.github.typesafegithub.workflows.domain.RunnerType.UbuntuLatest
-import io.github.typesafegithub.workflows.domain.triggers.PullRequest
-import io.github.typesafegithub.workflows.domain.triggers.PullRequest.Type.Closed
 import io.github.typesafegithub.workflows.domain.triggers.Push
 import io.github.typesafegithub.workflows.dsl.expressions.contexts.SecretsContext
 import io.github.typesafegithub.workflows.dsl.expressions.expr
@@ -52,8 +50,7 @@ object Branches {
 workflow(
     name = "Create Tag",
     on = listOf(
-        Push(branches = listOf(MAIN_BRANCH_NAME)),
-        PullRequest(types = listOf(Closed), branches = listOf(MAIN_BRANCH_NAME))
+        Push(branches = listOf(MAIN_BRANCH_NAME))
     ),
     permissions = mapOf(Contents to Write),
     sourceFile = __FILE__,
@@ -65,7 +62,7 @@ workflow(
             name = "Check out",
             action = Checkout(
                 fetchDepth = FetchDepth.Value(0),
-                ref = expr { github.eventPullRequest.pull_request.merge_commit_sha }
+                ref = expr { github.sha }
             )
         )
         uses(name = "Set up Java", action = SetupJava(javaVersion = "21", distribution = Temurin))

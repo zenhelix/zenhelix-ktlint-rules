@@ -1,4 +1,4 @@
 allprojects {
     group = "io.github.zenhelix"
-    version = "1.0.0"
+    version = findProperty("version")?.toString()?.takeIf { it != "unspecified" } ?: "1.0.0"
 }

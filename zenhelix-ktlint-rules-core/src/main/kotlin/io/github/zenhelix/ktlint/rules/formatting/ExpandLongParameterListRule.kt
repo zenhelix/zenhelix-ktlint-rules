@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import io.github.zenhelix.ktlint.rules.LineLengthSettings
+import io.github.zenhelix.ktlint.rules.WHITESPACE_REGEX
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.PARAM_TOKEN_SET
 import io.github.zenhelix.ktlint.rules.hasNewlineAfterComma
@@ -105,7 +106,7 @@ public class ExpandLongParameterListRule : ZenhelixRule(
         val textBetweenRparAndEq = buildString {
             var sibling = node.treeNext
             while (sibling != null && sibling != eq) {
-                append(sibling.text.replace('\n', ' ').replace(Regex("\\s+"), " "))
+                append(sibling.text.replace('\n', ' ').replace(WHITESPACE_REGEX, " "))
                 sibling = sibling.treeNext
             }
         }

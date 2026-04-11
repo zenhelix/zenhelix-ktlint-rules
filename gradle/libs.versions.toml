@@ -4,6 +4,7 @@ ktlint = "1.8.0"
 junit = "5.11.4"
 assertj = "3.27.3"
 slf4j = "2.0.17"
+maven-central-publish = "0.11.2"
 
 [libraries]
 ktlint-rule-engine-core = { module = "com.pinterest.ktlint:ktlint-rule-engine-core", version.ref = "ktlint" }
@@ -15,5 +16,8 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 
+maven-central-publish = { module = "io.github.zenhelix:maven-central-publish", version.ref = "maven-central-publish" }
+
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+maven-central-publish = { id = "io.github.zenhelix.maven-central-publish", version.ref = "maven-central-publish" }

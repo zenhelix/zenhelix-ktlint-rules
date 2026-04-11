@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.lexer.KtTokens
+import io.github.zenhelix.ktlint.rules.BLANK_LINE_RATIO_THRESHOLD
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.blankLineRatioBetweenParams
 import io.github.zenhelix.ktlint.rules.hasBlankLine
@@ -73,7 +74,4 @@ public class NoBlankLineInUndocumentedParameterListRule : ZenhelixRule(
         }
     }
 
-    private companion object {
-        const val BLANK_LINE_RATIO_THRESHOLD = 1.0 / 3.0
-    }
 }

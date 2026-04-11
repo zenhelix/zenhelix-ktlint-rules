@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.lexer.KtTokens
 import io.github.zenhelix.ktlint.rules.INDENT
+import io.github.zenhelix.ktlint.rules.WHITESPACE_REGEX
 import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collectWhitespace
@@ -292,7 +293,4 @@ public class CollapseIfConditionRule : ZenhelixRule(
         }
     }
 
-    private companion object {
-        val WHITESPACE_REGEX = Regex("\\s+")
-    }
 }

@@ -19,15 +19,8 @@ public val MEMBER_TYPES: TokenSet = TokenSet.create(
 )
 
 /** Same as [MEMBER_TYPES] but includes [KtNodeTypes.CLASS_INITIALIZER]. */
-public val MEMBER_TYPES_WITH_INITIALIZER: TokenSet = TokenSet.create(
-    KtNodeTypes.FUN,
-    KtNodeTypes.PROPERTY,
-    KtNodeTypes.CLASS,
-    KtNodeTypes.OBJECT_DECLARATION,
-    KtNodeTypes.SECONDARY_CONSTRUCTOR,
-    KtNodeTypes.TYPEALIAS,
-    KtNodeTypes.CLASS_INITIALIZER,
-)
+public val MEMBER_TYPES_WITH_INITIALIZER: TokenSet =
+    TokenSet.orSet(MEMBER_TYPES, TokenSet.create(KtNodeTypes.CLASS_INITIALIZER))
 
 /** Returns true if this OBJECT_DECLARATION node has the `companion` keyword. */
 public fun ASTNode.isCompanionObject(): Boolean = elementType == KtNodeTypes.OBJECT_DECLARATION &&
@@ -122,7 +115,6 @@ public fun ASTNode.suffixLengthAfterCollapse(): Int {
 public fun ASTNode.collapseParenthesizedWhitespace() {
     getChildren(null)
         .filter { it.elementType == TokenType.WHITE_SPACE }
-        .toList()
         .forEach { ws ->
             val prev = ws.treePrev
             val next = ws.treeNext
@@ -151,7 +143,7 @@ public fun ASTNode.isDataClassConstructor(): Boolean {
     val classNode = parent.treeParent ?: return false
     if (classNode.elementType != KtNodeTypes.CLASS) return false
     val modifierList = classNode.findChildByType(KtNodeTypes.MODIFIER_LIST) ?: return false
-    return modifierList.getChildren(null).any { it.text == "data" }
+    return modifierList.getChildren(null).any { it.elementType == KtTokens.DATA_KEYWORD }
 }
 
 /** Checks if any VALUE_PARAMETER child has a KDoc comment. */
@@ -160,6 +152,8 @@ public fun ASTNode.hasDocumentedParameter(): Boolean =
         child.elementType == KtNodeTypes.VALUE_PARAMETER &&
                 child.findChildByType(KDocTokens.KDOC) != null
     }
+
+public val PARAM_TOKEN_SET: TokenSet = TokenSet.create(KtNodeTypes.VALUE_PARAMETER)
 
 /** Checks if any VALUE_PARAMETER child has an annotation entry. */
 public fun ASTNode.hasAnnotatedParameter(): Boolean =
@@ -180,8 +174,6 @@ public fun ASTNode.hasBlockAnnotatedParameter(): Boolean =
         modifierList.text.contains('\n') ||
             modifierList.treeNext?.let { it.elementType == TokenType.WHITE_SPACE && it.text.contains('\n') } == true
     }
-
-public val PARAM_TOKEN_SET: TokenSet = TokenSet.create(KtNodeTypes.VALUE_PARAMETER)
 
 /** Standard indent (4 spaces). */
 public const val INDENT: String = "    "
@@ -242,7 +234,7 @@ public fun ASTNode.isEnumClass(): Boolean {
     } ?: return false
     if (classNode.elementType != KtNodeTypes.CLASS) return false
     val modifierList = classNode.findChildByType(KtNodeTypes.MODIFIER_LIST) ?: return false
-    return modifierList.getChildren(null).any { it.text == "enum" }
+    return modifierList.getChildren(null).any { it.elementType == KtTokens.ENUM_KEYWORD }
 }
 
 /** Returns true if the condition part of this WHEN_ENTRY (everything before `->`) contains a newline. */
@@ -293,6 +285,12 @@ public fun ASTNode.replaceBlankLineWithSingleNewline() {
     val indent = text.substringAfterLast('\n')
     (this as LeafPsiElement).rawReplaceWithText("\n$indent")
 }
+
+/** Threshold for blank-line ratio between parameters that triggers visual grouping. */
+public const val BLANK_LINE_RATIO_THRESHOLD: Double = 1.0 / 3.0
+
+/** Regex for collapsing runs of whitespace to a single space. */
+public val WHITESPACE_REGEX: Regex = Regex("\\s+")
 
 /**
  * Returns the ratio of blank lines between parameters (0.0 to 1.0).

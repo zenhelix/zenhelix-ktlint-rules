@@ -4,6 +4,10 @@ pluginManagement {
         mavenCentral()
         mavenLocal()
     }
+
+    plugins {
+        id("io.github.zenhelix.maven-central-publish") version "0.11.2"
+    }
 }
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

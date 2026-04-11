@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
+import io.github.zenhelix.ktlint.rules.BLANK_LINE_RATIO_THRESHOLD
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.PARAM_TOKEN_SET
 import io.github.zenhelix.ktlint.rules.blankLineRatioBetweenParams
@@ -91,6 +92,5 @@ public class BlankLineInDocumentedParameterListRule : ZenhelixRule(
 
     private companion object {
         const val MIN_PARAMS = 2
-        const val BLANK_LINE_RATIO_THRESHOLD = 1.0 / 3.0
     }
 }

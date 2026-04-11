@@ -1,6 +1,7 @@
 package io.github.zenhelix.ktlint.rules.ordering
 
 import com.pinterest.ktlint.test.KtLintAssertThat.Companion.assertThatRule
+import com.pinterest.ktlint.test.LintViolation
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -63,6 +64,40 @@ class PropertyBeforeFunctionRuleTest {
                 """.trimMargin()
             ).hasNoLintViolations()
         }
+
+        @Test
+        fun `should not report delegated property before function`() {
+            val code = """
+                |class Foo {
+                |    val name: String by lazy { "foo" }
+                |    fun bar() {}
+                |}
+            """.trimMargin()
+            ruleAssertThat(code).hasNoLintViolations()
+        }
+
+        @Test
+        fun `should not report abstract property before abstract function`() {
+            val code = """
+                |abstract class Foo {
+                |    abstract val x: Int
+                |    abstract fun bar()
+                |}
+            """.trimMargin()
+            ruleAssertThat(code).hasNoLintViolations()
+        }
+
+        @Test
+        fun `should not report when class has only properties`() {
+            val code = """
+                |class Foo {
+                |    val x = 1
+                |    val y = 2
+                |    val z = 3
+                |}
+            """.trimMargin()
+            ruleAssertThat(code).hasNoLintViolations()
+        }
     }
 
     @Nested
@@ -79,6 +114,43 @@ class PropertyBeforeFunctionRuleTest {
                 |}
                 """.trimMargin()
             ).hasLintViolationWithoutAutoCorrect(3, 5, violationMessage)
+        }
+
+        @Test
+        fun `should report property after function in object`() {
+            val code = """
+                |object Foo {
+                |    fun bar() {}
+                |    val x = 1
+                |}
+            """.trimMargin()
+            ruleAssertThat(code).hasLintViolationWithoutAutoCorrect(3, 5, violationMessage)
+        }
+
+        @Test
+        fun `should report property after function in interface`() {
+            val code = """
+                |interface Foo {
+                |    fun bar()
+                |    val x: Int
+                |}
+            """.trimMargin()
+            ruleAssertThat(code).hasLintViolationWithoutAutoCorrect(3, 5, violationMessage)
+        }
+
+        @Test
+        fun `should report multiple properties after function`() {
+            val code = """
+                |class Foo {
+                |    fun bar() {}
+                |    val x = 1
+                |    val y = 2
+                |}
+            """.trimMargin()
+            ruleAssertThat(code).hasLintViolationsWithoutAutoCorrect(
+                LintViolation(3, 5, violationMessage),
+                LintViolation(4, 5, violationMessage),
+            )
         }
     }
 }

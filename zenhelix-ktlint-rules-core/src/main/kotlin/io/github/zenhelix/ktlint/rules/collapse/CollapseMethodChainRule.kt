@@ -1,13 +1,14 @@
 package io.github.zenhelix.ktlint.rules.collapse
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collectWhitespace
 import io.github.zenhelix.ktlint.rules.lineIndent
@@ -40,6 +41,12 @@ import io.github.zenhelix.ktlint.rules.shiftIndent
  */
 public class CollapseMethodChainRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:collapse-method-chain"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_CHAIN_METHOD_CONTINUATION_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -96,7 +103,7 @@ public class CollapseMethodChainRule : ZenhelixRule(
         val methodFirstLine = afterDot.text.substringBefore('\n', afterDot.text)
 
         val collapsedLength = receiverPrefix.length + receiverLastLine.length + dotText.length + methodFirstLine.length
-        if (collapsedLength > LineLengthSettings.HARD_MAX_LINE_LENGTH) return
+        if (collapsedLength > lineLengthSettings.hard) return
 
         val dotIndent = wsBefore.text.substringAfterLast('\n')
         val receiverIndent = receiver.lineIndent()
@@ -148,5 +155,9 @@ public class CollapseMethodChainRule : ZenhelixRule(
         // If so, there are more steps after us → we're in a chain
         val parentFirstChild = parent.firstChildNode
         return parentFirstChild === node
+    }
+
+    private companion object {
+        val STANDARD_CHAIN_METHOD_CONTINUATION_RULE_ID = RuleId("standard:chain-method-continuation")
     }
 }

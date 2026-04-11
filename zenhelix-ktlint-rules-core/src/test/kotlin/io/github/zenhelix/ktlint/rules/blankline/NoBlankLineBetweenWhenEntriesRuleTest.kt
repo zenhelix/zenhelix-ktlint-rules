@@ -130,7 +130,147 @@ class NoBlankLineBetweenWhenEntriesRuleTest {
     }
 
     @Nested
+    inner class `should remove blank lines additional cases` {
+
+        @Test
+        fun `blank line between single-line entries with else`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = when (value) {
+                |    1 -> "one"
+                |
+                |    2 -> "two"
+                |
+                |    else -> "other"
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |val x = when (value) {
+                    |    1 -> "one"
+                    |    2 -> "two"
+                    |    else -> "other"
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `multiple blank lines between entries`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = when {
+                |    condition1 -> "a"
+                |
+                |
+                |    condition2 -> "b"
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |val x = when {
+                    |    condition1 -> "a"
+                    |    condition2 -> "b"
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `blank lines in when without subject`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val y = when {
+                |    x > 0 -> "positive"
+                |
+                |    x < 0 -> "negative"
+                |
+                |    else -> "zero"
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |val y = when {
+                    |    x > 0 -> "positive"
+                    |    x < 0 -> "negative"
+                    |    else -> "zero"
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `is-check entries with blank line`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = when (obj) {
+                |    is String -> "string"
+                |
+                |    is Int -> "int"
+                |
+                |    is Double -> "double"
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |val x = when (obj) {
+                    |    is String -> "string"
+                    |    is Int -> "int"
+                    |    is Double -> "double"
+                    |}
+                    """.trimMargin()
+                )
+        }
+    }
+
+    @Nested
     inner class `should preserve blank lines` {
+
+        @Test
+        fun `no blank line between block-body entries`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = when {
+                |    condition1 -> {
+                |        doSomething()
+                |        result1
+                |    }
+                |    condition2 -> {
+                |        doOther()
+                |        result2
+                |    }
+                |}
+                """.trimMargin()
+            ).hasNoLintViolations()
+        }
+
+        @Test
+        fun `no blank lines between entries`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = when (value) {
+                |    1 -> "one"
+                |    2 -> "two"
+                |    3 -> "three"
+                |    else -> "other"
+                |}
+                """.trimMargin()
+            ).hasNoLintViolations()
+        }
 
         @Test
         fun `multiline condition`() {

@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.formatting
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import com.pinterest.ktlint.rule.engine.core.api.upsertWhitespaceAfterMe
 import com.pinterest.ktlint.rule.engine.core.api.upsertWhitespaceBeforeMe
@@ -9,7 +11,6 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.WHITESPACE_REGEX
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.PARAM_TOKEN_SET
@@ -36,6 +37,12 @@ import io.github.zenhelix.ktlint.rules.textAfterNodeOnSameLine
  */
 public class ExpandLongParameterListRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:expand-long-parameter-list"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_PARAMETER_LIST_WRAPPING_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -55,17 +62,17 @@ public class ExpandLongParameterListRule : ZenhelixRule(
         // 2. Line exceeds max length (2+ params) or hard max (1 param)
         val benefitsFromExpansion = wouldBenefitFromExpansion(node)
         if (!benefitsFromExpansion) {
-            if (params.size <= 1 && !hasLongParamLine(node, LineLengthSettings.HARD_MAX_LINE_LENGTH)) return
+            if (params.size <= 1 && !hasLongParamLine(node, lineLengthSettings.hard)) return
             if (!hasLongParamLine(node)) return
 
             // Abstract/interface methods have no body — the signature IS the declaration.
             // Only expand if exceeds HARD_MAX (160) to keep declarations compact.
-            if (node.isBodylessFunction() && !hasLongParamLine(node, LineLengthSettings.HARD_MAX_LINE_LENGTH)) return
+            if (node.isBodylessFunction() && !hasLongParamLine(node, lineLengthSettings.hard)) return
 
             // Don't expand params when the signature (up to '= ') fits —
             // expression body length is not the params' responsibility.
             // Exception: always expand when line exceeds hard max (160)
-            if (!hasLongParamLine(node, LineLengthSettings.HARD_MAX_LINE_LENGTH) && signatureFitsWithoutExpressionBody(node)) return
+            if (!hasLongParamLine(node, lineLengthSettings.hard) && signatureFitsWithoutExpressionBody(node)) return
         }
 
         emitAndCorrect(emit, node.startOffset, "Parameter list should be expanded to multiple lines") {
@@ -111,7 +118,7 @@ public class ExpandLongParameterListRule : ZenhelixRule(
             }
         }
         val collapsedLine = "$baseIndent)$textBetweenRparAndEq= $expressionFirstLine"
-        return collapsedLine.length <= LineLengthSettings.STANDARD_MAX_LINE_LENGTH
+        return collapsedLine.length <= lineLengthSettings.standard
     }
 
     /**
@@ -144,11 +151,11 @@ public class ExpandLongParameterListRule : ZenhelixRule(
         }
         lengthToEq += "= ".length
 
-        return lengthToEq <= LineLengthSettings.STANDARD_MAX_LINE_LENGTH
+        return lengthToEq <= lineLengthSettings.standard
     }
 
     private fun hasLongParamLine(node: ASTNode): Boolean =
-        hasLongParamLine(node, LineLengthSettings.COLLAPSE_MAX_LINE_LENGTH)
+        hasLongParamLine(node, lineLengthSettings.collapse)
 
     private fun hasLongParamLine(node: ASTNode, maxLength: Int): Boolean {
         val lpar = node.findChildByType(KtTokens.LPAR) ?: return false
@@ -177,7 +184,7 @@ public class ExpandLongParameterListRule : ZenhelixRule(
 
         val params = node.getChildren(PARAM_TOKEN_SET)
         val allParamsOneLine = params.joinToString(", ") { it.text.trim() }
-        val allFitOnOneLine = paramIndent.length + allParamsOneLine.length <= LineLengthSettings.STANDARD_MAX_LINE_LENGTH
+        val allFitOnOneLine = paramIndent.length + allParamsOneLine.length <= lineLengthSettings.standard
 
         // Ensure newline + indent after LPAR
         lpar.upsertWhitespaceAfterMe("\n$paramIndent")
@@ -192,5 +199,9 @@ public class ExpandLongParameterListRule : ZenhelixRule(
                 val replacement = if (allFitOnOneLine) " " else "\n$paramIndent"
                 (ws as LeafPsiElement).rawReplaceWithText(replacement)
             }
+    }
+
+    private companion object {
+        val STANDARD_PARAMETER_LIST_WRAPPING_RULE_ID = RuleId("standard:parameter-list-wrapping")
     }
 }

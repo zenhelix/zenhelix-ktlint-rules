@@ -1,11 +1,12 @@
 package io.github.zenhelix.ktlint.rules.collapse
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collapseParenthesizedWhitespace
 import io.github.zenhelix.ktlint.rules.fitsOnOneLine
@@ -30,6 +31,12 @@ import io.github.zenhelix.ktlint.rules.hasPartialNewlinesAfterComma
  */
 public class CollapseArgumentListRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:collapse-argument-list"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_ARGUMENT_LIST_WRAPPING_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -52,9 +59,9 @@ public class CollapseArgumentListRule : ZenhelixRule(
         // Single-argument lists have no readability benefit from wrapping,
         // so allow collapsing up to HARD_MAX. Multi-arg lists use COLLAPSE_MAX.
         val maxLength = if (args.size == 1) {
-            LineLengthSettings.HARD_MAX_LINE_LENGTH
+            lineLengthSettings.hard
         } else {
-            LineLengthSettings.COLLAPSE_MAX_LINE_LENGTH
+            lineLengthSettings.collapse
         }
         if (!node.fitsOnOneLine(collapsedText, maxLength)) return
 
@@ -87,6 +94,7 @@ public class CollapseArgumentListRule : ZenhelixRule(
         }
 
     private companion object {
+        val STANDARD_ARGUMENT_LIST_WRAPPING_RULE_ID = RuleId("standard:argument-list-wrapping")
         val ARG_TOKEN_SET: TokenSet = TokenSet.create(KtNodeTypes.VALUE_ARGUMENT)
     }
 }

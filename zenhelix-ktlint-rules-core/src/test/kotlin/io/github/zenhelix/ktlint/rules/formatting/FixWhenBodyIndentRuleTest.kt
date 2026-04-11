@@ -103,7 +103,209 @@ class FixWhenBodyIndentRuleTest {
     }
 
     @Nested
+    inner class `should fix additional cases` {
+
+        @Test
+        fun `when used as expression in return statement`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun classify(x: Any): Int {
+                |    return when (x) {
+                |    is String -> x.length
+                |    is Int    -> x + 1
+                |    else      -> 0
+                |    }
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun classify(x: Any): Int {
+                    |    return when (x) {
+                    |        is String -> x.length
+                    |        is Int    -> x + 1
+                    |        else      -> 0
+                    |    }
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `when used as property initializer`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val result = when (x) {
+                |is String -> "str"
+                |is Int    -> "int"
+                |else      -> "other"
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |val result = when (x) {
+                    |    is String -> "str"
+                    |    is Int    -> "int"
+                    |    else      -> "other"
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `nested when with wrong indentation on inner when`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun handle(x: Any, y: Any) {
+                |    when (x) {
+                |        is String -> {
+                |            when (y) {
+                |            is Int    -> println("int")
+                |            is Double -> println("double")
+                |            else      -> println("other")
+                |            }
+                |        }
+                |        else -> println("default")
+                |    }
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun handle(x: Any, y: Any) {
+                    |    when (x) {
+                    |        is String -> {
+                    |            when (y) {
+                    |                is Int    -> println("int")
+                    |                is Double -> println("double")
+                    |                else      -> println("other")
+                    |            }
+                    |        }
+                    |        else -> println("default")
+                    |    }
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `when with single entry wrong indent`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test(x: Any) = when (x) {
+                |is String -> x.length
+                |else      -> 0
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun test(x: Any) = when (x) {
+                    |    is String -> x.length
+                    |    else      -> 0
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `when without subject wrong indent`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test(x: Int) = when {
+                |x > 0  -> "positive"
+                |x < 0  -> "negative"
+                |else   -> "zero"
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun test(x: Int) = when {
+                    |    x > 0  -> "positive"
+                    |    x < 0  -> "negative"
+                    |    else   -> "zero"
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `when with multiline entry body wrong indent`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test(x: Any) {
+                |    when (x) {
+                |    is String -> {
+                |        println("string")
+                |        println("done")
+                |    }
+                |    else -> println("other")
+                |    }
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun test(x: Any) {
+                    |    when (x) {
+                    |        is String -> {
+                    |            println("string")
+                    |            println("done")
+                    |        }
+                    |        else -> println("other")
+                    |    }
+                    |}
+                    """.trimMargin()
+                )
+        }
+    }
+
+    @Nested
     inner class `should not fix` {
+
+        @Test
+        fun `already correct when in function`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test(x: Any) {
+                |    when (x) {
+                |        is String -> println("str")
+                |        is Int    -> println("int")
+                |        else      -> println("other")
+                |    }
+                |}
+                """.trimMargin()
+            ).hasNoLintViolations()
+        }
+
+        @Test
+        fun `when without subject correct indent`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test(x: Int) = when {
+                |    x > 0  -> "positive"
+                |    x < 0  -> "negative"
+                |    else   -> "zero"
+                |}
+                """.trimMargin()
+            ).hasNoLintViolations()
+        }
 
         @Test
         fun `already correct indent`() {

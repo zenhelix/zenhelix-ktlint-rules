@@ -7,7 +7,6 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.lexer.KtTokens
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.PARAM_TOKEN_SET
 import io.github.zenhelix.ktlint.rules.collapseParenthesizedWhitespace
@@ -24,13 +23,11 @@ import io.github.zenhelix.ktlint.rules.isEnumClass
  * Collapses multiline parameter lists to a single line when they fit within max line length.
  * Skips parameter lists where parameters have KDoc comments.
  */
-private val FUNCTION_EXPRESSION_BODY_RULE_ID = RuleId("standard:function-expression-body")
-
 public class CollapseParameterListRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:collapse-parameter-list"),
     visitorModifiers = setOf(
         VisitorModifier.RunAfterRule(
-            ruleId = FUNCTION_EXPRESSION_BODY_RULE_ID,
+            ruleId = STANDARD_FUNCTION_EXPRESSION_BODY_RULE_ID,
             mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
         ),
     ),
@@ -59,9 +56,9 @@ public class CollapseParameterListRule : ZenhelixRule(
         val collapsedText = "($collapsedParams)"
 
         val maxLength = when {
-            hasFunctionalParameter(params) -> LineLengthSettings.COLLAPSE_FUNCTIONAL_MAX_LINE_LENGTH
-            node.isBodylessFunction() -> LineLengthSettings.HARD_MAX_LINE_LENGTH
-            else -> LineLengthSettings.COLLAPSE_MAX_LINE_LENGTH
+            hasFunctionalParameter(params) -> lineLengthSettings.collapseFunctional
+            node.isBodylessFunction() -> lineLengthSettings.hard
+            else -> lineLengthSettings.collapse
         }
         if (!node.fitsOnOneLine(collapsedText, maxLength)) return
 
@@ -98,6 +95,7 @@ public class CollapseParameterListRule : ZenhelixRule(
     }
 
     private companion object {
+        val STANDARD_FUNCTION_EXPRESSION_BODY_RULE_ID = RuleId("standard:function-expression-body")
 
         val MODIFIER_KEYWORDS: TokenSet = TokenSet.create(
             KtTokens.PUBLIC_KEYWORD,

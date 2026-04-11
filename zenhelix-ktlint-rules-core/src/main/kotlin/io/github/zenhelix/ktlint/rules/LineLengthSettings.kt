@@ -1,16 +1,17 @@
 package io.github.zenhelix.ktlint.rules
 
-public object LineLengthSettings {
+import kotlin.math.ceil
 
-    /** Standard max line length — used by [ExpandLongParameterListRule] to trigger expansion. */
-    public const val STANDARD_MAX_LINE_LENGTH: Int = 120
+public data class LineLengthSettings(public val maxLineLength: Int = DEFAULT_MAX_LINE_LENGTH) {
+    public val hard: Int = maxLineLength
+    public val collapse: Int = ceil(maxLineLength * COLLAPSE_RATIO).toInt()
+    public val standard: Int = (maxLineLength * STANDARD_RATIO).toInt()
+    public val collapseFunctional: Int = (maxLineLength * COLLAPSE_FUNCTIONAL_RATIO).toInt()
 
-    /** Max line length for collapse rules — used by [CollapseParameterListRule] and [CollapseArgumentListRule]. */
-    public const val COLLAPSE_MAX_LINE_LENGTH: Int = 130
-
-    /** Max line length for collapsing parameter lists that contain function-type parameters. */
-    public const val COLLAPSE_FUNCTIONAL_MAX_LINE_LENGTH: Int = 120
-
-    /** Hard max line length — used by [CollapseExpressionBodyRule], [CollapseConstructorAnnotationRule], and [ExpandLongParameterListRule]. */
-    public const val HARD_MAX_LINE_LENGTH: Int = 160
+    public companion object {
+        public const val DEFAULT_MAX_LINE_LENGTH: Int = 160
+        private const val COLLAPSE_RATIO: Double = 0.81
+        private const val STANDARD_RATIO: Double = 0.75
+        private const val COLLAPSE_FUNCTIONAL_RATIO: Double = 0.75
+    }
 }

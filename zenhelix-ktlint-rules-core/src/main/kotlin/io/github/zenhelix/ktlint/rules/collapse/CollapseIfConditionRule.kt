@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.collapse
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -10,7 +12,6 @@ import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.lexer.KtTokens
 import io.github.zenhelix.ktlint.rules.INDENT
 import io.github.zenhelix.ktlint.rules.WHITESPACE_REGEX
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collectWhitespace
 import io.github.zenhelix.ktlint.rules.lineIndent
@@ -49,6 +50,12 @@ import io.github.zenhelix.ktlint.rules.linePrefix
  */
 public class CollapseIfConditionRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:collapse-if-condition"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_MULTILINE_EXPRESSION_WRAPPING_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -78,7 +85,7 @@ public class CollapseIfConditionRule : ZenhelixRule(
         val collapsedLine = ifPrefix + collapsedCondition + ")"
         val suffixLength = estimateSuffix(rpar)
 
-        if (collapsedLine.length + suffixLength <= LineLengthSettings.HARD_MAX_LINE_LENGTH) {
+        if (collapsedLine.length + suffixLength <= lineLengthSettings.hard) {
             collapseCondition(node, lpar, rpar, condition, emit)
         } else {
             breakConditionAtOperators(node, lpar, rpar, condition, emit)
@@ -293,4 +300,7 @@ public class CollapseIfConditionRule : ZenhelixRule(
         }
     }
 
+    private companion object {
+        val STANDARD_MULTILINE_EXPRESSION_WRAPPING_RULE_ID = RuleId("standard:multiline-expression-wrapping")
+    }
 }

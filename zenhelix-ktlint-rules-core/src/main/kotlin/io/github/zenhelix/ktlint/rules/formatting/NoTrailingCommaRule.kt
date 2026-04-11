@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.formatting
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -16,6 +18,16 @@ import io.github.zenhelix.ktlint.rules.ZenhelixRule
  */
 public class NoTrailingCommaRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:no-trailing-comma"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_TRAILING_COMMA_ON_DECLARATION_SITE_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_TRAILING_COMMA_ON_CALL_SITE_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -60,6 +72,8 @@ public class NoTrailingCommaRule : ZenhelixRule(
     }
 
     private companion object {
+        val STANDARD_TRAILING_COMMA_ON_DECLARATION_SITE_RULE_ID = RuleId("standard:trailing-comma-on-declaration-site")
+        val STANDARD_TRAILING_COMMA_ON_CALL_SITE_RULE_ID = RuleId("standard:trailing-comma-on-call-site")
 
         val CLOSING_TOKENS: TokenSet = TokenSet.create(
             KtTokens.RPAR,

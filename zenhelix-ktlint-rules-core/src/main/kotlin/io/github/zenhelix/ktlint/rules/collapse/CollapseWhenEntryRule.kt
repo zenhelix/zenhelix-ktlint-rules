@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.collapse
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -9,7 +11,6 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.lexer.KtTokens
 import io.github.zenhelix.ktlint.rules.INDENT
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collectWhitespace
 import io.github.zenhelix.ktlint.rules.columnOf
@@ -42,6 +43,12 @@ import io.github.zenhelix.ktlint.rules.shiftIndent
  */
 public class CollapseWhenEntryRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:collapse-when-entry"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_WHEN_ENTRY_BRACING_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -77,7 +84,7 @@ public class CollapseWhenEntryRule : ZenhelixRule(
     ) {
         val arrowColumn = arrow.columnOf()
         val collapsedLength = arrowColumn + "-> ".length + statementText.length
-        if (collapsedLength > LineLengthSettings.STANDARD_MAX_LINE_LENGTH) return
+        if (collapsedLength > lineLengthSettings.standard) return
 
         emitAndCorrect(emit, body.startOffset, "When entry body with single expression does not need braces") {
             replaceBlockWithStatementNode(wsAfterArrow, body, statement)
@@ -95,7 +102,7 @@ public class CollapseWhenEntryRule : ZenhelixRule(
         val firstLine = statementText.substringBefore('\n')
         val arrowColumn = arrow.columnOf()
         val collapsedFirstLineLength = arrowColumn + "-> ".length + firstLine.length
-        if (collapsedFirstLineLength > LineLengthSettings.STANDARD_MAX_LINE_LENGTH) return
+        if (collapsedFirstLineLength > lineLengthSettings.standard) return
 
         if (hasMultilineWhenEntries(statement)) return
 
@@ -153,6 +160,7 @@ public class CollapseWhenEntryRule : ZenhelixRule(
     }
 
     private companion object {
+        val STANDARD_WHEN_ENTRY_BRACING_RULE_ID = RuleId("standard:when-entry-bracing")
 
         val COMMENT_TYPES = TokenSet.create(
             KtTokens.EOL_COMMENT,

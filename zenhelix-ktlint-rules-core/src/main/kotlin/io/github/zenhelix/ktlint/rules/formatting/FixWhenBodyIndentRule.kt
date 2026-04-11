@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.formatting
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -34,6 +36,12 @@ import io.github.zenhelix.ktlint.rules.shiftIndent
  */
 public class FixWhenBodyIndentRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:fix-when-body-indent"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_INDENT_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -80,5 +88,9 @@ public class FixWhenBodyIndentRule : ZenhelixRule(
                 next.collectWhitespace(requireNewline = true).forEach { it.shiftIndent(shift) }
             }
         }
+    }
+
+    private companion object {
+        val STANDARD_INDENT_RULE_ID = RuleId("standard:indent")
     }
 }

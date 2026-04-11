@@ -1,13 +1,14 @@
 package io.github.zenhelix.ktlint.rules.collapse
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.columnOf
 import io.github.zenhelix.ktlint.rules.findBlock
@@ -43,6 +44,12 @@ import io.github.zenhelix.ktlint.rules.suffixLengthAfterCollapse
  */
 public class CollapseShortLambdaRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:collapse-short-lambda"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_FUNCTION_LITERAL_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -66,7 +73,7 @@ public class CollapseShortLambdaRule : ZenhelixRule(
         val collapsedText = buildCollapsedText(node, lbrace, statementText)
         val column = lbrace.columnOf()
         val suffixLength = rbrace.suffixLengthAfterCollapse()
-        if (column + collapsedText.length + suffixLength > LineLengthSettings.STANDARD_MAX_LINE_LENGTH) return
+        if (column + collapsedText.length + suffixLength > lineLengthSettings.standard) return
 
         emitAndCorrect(emit, node.startOffset, "Short lambda fits on a single line") {
             collapseWhitespace(node, lbrace, rbrace)
@@ -126,5 +133,9 @@ public class CollapseShortLambdaRule : ZenhelixRule(
         toCollapse.forEach { (ws, replacement) ->
             (ws as LeafPsiElement).rawReplaceWithText(replacement)
         }
+    }
+
+    private companion object {
+        val STANDARD_FUNCTION_LITERAL_RULE_ID = RuleId("standard:function-literal")
     }
 }

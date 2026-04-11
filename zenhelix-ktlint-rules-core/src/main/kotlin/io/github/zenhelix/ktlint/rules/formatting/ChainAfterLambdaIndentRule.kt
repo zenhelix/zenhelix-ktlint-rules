@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.formatting
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -34,6 +36,12 @@ import io.github.zenhelix.ktlint.rules.lineIndent
  */
 public class ChainAfterLambdaIndentRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:chain-after-lambda-indent"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_INDENT_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -141,5 +149,9 @@ public class ChainAfterLambdaIndentRule : ZenhelixRule(
             current = current.treeParent
         }
         return result.toString().takeWhile { it == ' ' || it == '\t' }
+    }
+
+    private companion object {
+        val STANDARD_INDENT_RULE_ID = RuleId("standard:indent")
     }
 }

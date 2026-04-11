@@ -200,6 +200,70 @@ class ChainAfterLambdaIndentRuleTest {
     }
 
     @Nested
+    inner class `deeply nested and parameterized lambdas` {
+
+        @Test
+        fun `should fix deeply nested chain after lambda`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test() {
+                |    val result = outer {
+                |        inner {
+                |            doWork()
+                |        }
+                |    }
+                |            .map { it.name }
+                |            .toList()
+                |}
+                """.trimMargin()
+            )
+                .hasLintViolation(7, 13, violationMessage)
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun test() {
+                    |    val result = outer {
+                    |        inner {
+                    |            doWork()
+                    |        }
+                    |    }
+                    |    .map { it.name }
+                    |    .toList()
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `should fix chain after lambda with parameters`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test() {
+                |    val result = items.fold(0) { acc, item ->
+                |        acc + item.value
+                |    }
+                |            .toString()
+                |}
+                """.trimMargin()
+            )
+                .hasLintViolation(5, 13, violationMessage)
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun test() {
+                    |    val result = items.fold(0) { acc, item ->
+                    |        acc + item.value
+                    |    }
+                    |    .toString()
+                    |}
+                    """.trimMargin()
+                )
+        }
+    }
+
+    @Nested
     inner class `should not touch` {
 
         @Test

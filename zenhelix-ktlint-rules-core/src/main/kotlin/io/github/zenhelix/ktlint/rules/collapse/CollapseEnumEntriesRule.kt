@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.columnOf
 import io.github.zenhelix.ktlint.rules.isEnumClass
@@ -53,7 +52,7 @@ public class CollapseEnumEntriesRule : ZenhelixRule(
 
         val collapsedEntries = entries.joinToString(", ") { it.text.trimEnd().removeSuffix(",") }
         val column = entries.first().columnOf()
-        if (column + collapsedEntries.length > LineLengthSettings.COLLAPSE_MAX_LINE_LENGTH) return
+        if (column + collapsedEntries.length > lineLengthSettings.collapse) return
 
         emitAndCorrect(emit, node.startOffset, "Enum entries fit on a single line") {
             collapseWhitespaceBetweenEntries(node)

@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.formatting
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -8,7 +10,6 @@ import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import io.github.zenhelix.ktlint.rules.INDENT
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.findBlock
 import io.github.zenhelix.ktlint.rules.hasNewlineInDirectChildren
@@ -34,6 +35,12 @@ import io.github.zenhelix.ktlint.rules.textAfterNodeOnSameLine
  */
 public class ExpandLongLambdaRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:expand-long-lambda"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_FUNCTION_LITERAL_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -51,7 +58,7 @@ public class ExpandLongLambdaRule : ZenhelixRule(
         val prefixLength = lbrace.linePrefix().length
         val lineSuffix = node.textAfterNodeOnSameLine()
         val lineLength = prefixLength + node.textLength + lineSuffix.length
-        if (lineLength <= LineLengthSettings.HARD_MAX_LINE_LENGTH) return
+        if (lineLength <= lineLengthSettings.hard) return
 
         val baseIndent = lbrace.lineIndent()
         val bodyIndent = baseIndent + INDENT
@@ -81,4 +88,7 @@ public class ExpandLongLambdaRule : ZenhelixRule(
         }
     }
 
+    private companion object {
+        val STANDARD_FUNCTION_LITERAL_RULE_ID = RuleId("standard:function-literal")
+    }
 }

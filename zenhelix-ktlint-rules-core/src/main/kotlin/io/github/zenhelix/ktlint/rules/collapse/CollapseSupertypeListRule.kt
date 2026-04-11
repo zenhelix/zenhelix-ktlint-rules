@@ -1,13 +1,14 @@
 package io.github.zenhelix.ktlint.rules.collapse
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.linePrefix
 import io.github.zenhelix.ktlint.rules.textAfterNodeOnSameLine
@@ -29,6 +30,12 @@ import io.github.zenhelix.ktlint.rules.textAfterNodeOnSameLine
  */
 public class CollapseSupertypeListRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:collapse-supertype-list"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_WRAPPING_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -55,11 +62,14 @@ public class CollapseSupertypeListRule : ZenhelixRule(
         val textAfterSupertype = node.textAfterNodeOnSameLine()
         val collapsedLength = colonLinePrefix.length + ": ".length + supertypeText.length + textAfterSupertype.length
 
-        if (collapsedLength > LineLengthSettings.COLLAPSE_MAX_LINE_LENGTH) return
+        if (collapsedLength > lineLengthSettings.collapse) return
 
         emitAndCorrect(emit, wsBefore.startOffset, "Supertype list fits on the same line as class declaration") {
             (wsBefore as LeafPsiElement).rawReplaceWithText(" ")
         }
     }
 
+    private companion object {
+        val STANDARD_WRAPPING_RULE_ID = RuleId("standard:wrapping")
+    }
 }

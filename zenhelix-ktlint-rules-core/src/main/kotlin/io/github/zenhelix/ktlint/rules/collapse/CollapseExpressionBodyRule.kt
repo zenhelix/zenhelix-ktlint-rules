@@ -1,6 +1,8 @@
 package io.github.zenhelix.ktlint.rules.collapse
 
 import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier
+import com.pinterest.ktlint.rule.engine.core.api.Rule.VisitorModifier.RunAfterRule.Mode.REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
@@ -9,7 +11,6 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import io.github.zenhelix.ktlint.rules.INDENT
 import io.github.zenhelix.ktlint.rules.WHITESPACE_REGEX
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collectWhitespace
 import io.github.zenhelix.ktlint.rules.lineIndent
@@ -47,6 +48,12 @@ import io.github.zenhelix.ktlint.rules.shiftIndent
  */
 public class CollapseExpressionBodyRule : ZenhelixRule(
     ruleId = RuleId("zenhelix:collapse-expression-body"),
+    visitorModifiers = setOf(
+        VisitorModifier.RunAfterRule(
+            ruleId = STANDARD_FUNCTION_EXPRESSION_BODY_RULE_ID,
+            mode = REGARDLESS_WHETHER_RUN_AFTER_RULE_IS_LOADED_OR_DISABLED,
+        ),
+    ),
 ) {
 
     override fun beforeVisitChildNodes(
@@ -76,7 +83,7 @@ public class CollapseExpressionBodyRule : ZenhelixRule(
 
         val eqLinePrefix = eq.linePrefix()
         val isMultilineExpression = expression.text.contains('\n')
-        val maxLength = LineLengthSettings.HARD_MAX_LINE_LENGTH
+        val maxLength = lineLengthSettings.hard
 
         // Try 1: collapse ENTIRE multiline expression to one line (e.g., elvis `expr ?: fallback`)
         if (isMultilineExpression && tryCollapseEntireExpression(eqLinePrefix, expression, wsAfterEq, emit)) {
@@ -112,7 +119,7 @@ public class CollapseExpressionBodyRule : ZenhelixRule(
 
         val collapsedText = expression.text.replace(WHITESPACE_REGEX, " ")
         val fullLength = eqLinePrefix.length + "= ".length + collapsedText.length
-        if (fullLength > LineLengthSettings.HARD_MAX_LINE_LENGTH) return false
+        if (fullLength > lineLengthSettings.hard) return false
 
         emitAndCorrect(emit, wsAfterEq.startOffset, "Expression body should start on the same line as '='") {
             (wsAfterEq as LeafPsiElement).rawReplaceWithText(" ")
@@ -210,4 +217,7 @@ public class CollapseExpressionBodyRule : ZenhelixRule(
             .forEach { it.shiftIndent(shift) }
     }
 
+    private companion object {
+        val STANDARD_FUNCTION_EXPRESSION_BODY_RULE_ID = RuleId("standard:function-expression-body")
+    }
 }

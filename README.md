@@ -14,7 +14,7 @@ These rules target the gap between what ktlint provides and what a consistent, d
 - **Blank lines** — remove noise between similar declarations, add breathing room in documented parameter lists
 - **Formatting** — align when-arrows, enforce braces, remove trailing commas, shorten qualified names
 
-All rules have autocorrect. Line length limits are hardcoded: standard=120, collapse=130, hard=160.
+All rules have autocorrect. Line length limits scale proportionally from `max_line_length` in `.editorconfig` (default 160): hard=100%, collapse=81%, standard=75%.
 
 ## Installation
 
@@ -618,6 +618,37 @@ class UserController {
     fun getUser(@PathVariable id: Long): User = userService.find(id)
 }
 ```
+
+## Configuration
+
+### EditorConfig
+
+Zenhelix rules read `max_line_length` from `.editorconfig`. If not set, the default is **160**.
+
+```ini
+[*.{kt,kts}]
+max_line_length = 160
+```
+
+Line length thresholds scale proportionally:
+
+| Threshold | Ratio | max=160 | max=140 | max=120 |
+|-----------|-------|---------|---------|---------|
+| Hard | 100% | 160 | 140 | 120 |
+| Collapse | 81% | 130 | 114 | 98 |
+| Standard | 75% | 120 | 105 | 90 |
+
+### Disabling Conflicting Standard Rules
+
+Several zenhelix rules replace standard KtLint rules. To avoid conflicts, disable the overlapping standard rules in your `.editorconfig`. A ready-to-use template is provided at [`docs/.editorconfig.template`](docs/.editorconfig.template).
+
+Key conflicts:
+- `zenhelix:no-trailing-comma` conflicts with `standard:trailing-comma-on-declaration-site`, `standard:trailing-comma-on-call-site`
+- Collapse/expand rules conflict with `standard:argument-list-wrapping`, `standard:parameter-list-wrapping`, `standard:wrapping`, etc.
+- Blank line rules conflict with `standard:no-blank-line-in-list`, `standard:blank-line-before-declaration`, etc.
+- Formatting rules conflict with `standard:indent`, `standard:annotation`, `standard:function-signature`, etc.
+
+See the full list in [`docs/.editorconfig.template`](docs/.editorconfig.template).
 
 ## Compatibility
 

@@ -1,5 +1,6 @@
 package io.github.zenhelix.ktlint.rules.formatting
 
+import com.pinterest.ktlint.rule.engine.core.api.editorconfig.MAX_LINE_LENGTH_PROPERTY
 import com.pinterest.ktlint.test.KtLintAssertThat.Companion.assertThatRule
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -111,6 +112,7 @@ class ExpandLongParameterListRuleTest {
                 |    contentFormUrlencoded().body(FormInserterBuilder().apply(builder).build())
                 """.trimMargin()
             )
+                .withEditorConfigOverride(MAX_LINE_LENGTH_PROPERTY to 160)
                 // language=kotlin
                 .isFormattedAs(
                     """
@@ -231,7 +233,9 @@ class ExpandLongParameterListRuleTest {
                 """
                 |fun collateralRegistryCircuitBreaker(circuitBreakerRegistry: CircuitBreakerRegistry): CircuitBreaker = circuitBreakerRegistry.createCircuitBreaker()
                 """.trimMargin()
-            ).hasNoLintViolations()
+            )
+                .withEditorConfigOverride(MAX_LINE_LENGTH_PROPERTY to 160)
+                .hasNoLintViolations()
         }
 
         @Test
@@ -261,7 +265,9 @@ class ExpandLongParameterListRuleTest {
                 """
                 |fun getPrevStatuses(status: T, includeCurrent: Boolean = false): Set<T> = transitionsToPrev[status]?.let { if (includeCurrent) it.plus(status) else it }
                 """.trimMargin()
-            ).hasNoLintViolations()
+            )
+                .withEditorConfigOverride(MAX_LINE_LENGTH_PROPERTY to 160)
+                .hasNoLintViolations()
         }
 
         @Test

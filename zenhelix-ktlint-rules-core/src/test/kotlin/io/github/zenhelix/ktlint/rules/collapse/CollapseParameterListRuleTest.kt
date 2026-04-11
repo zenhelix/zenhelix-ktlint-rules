@@ -1,5 +1,6 @@
 package io.github.zenhelix.ktlint.rules.collapse
 
+import com.pinterest.ktlint.rule.engine.core.api.editorconfig.MAX_LINE_LENGTH_PROPERTY
 import com.pinterest.ktlint.test.KtLintAssertThat.Companion.assertThatRule
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -208,6 +209,7 @@ class CollapseParameterListRuleTest {
                 |    ) {}
                 """.trimMargin()
             )
+                .withEditorConfigOverride(MAX_LINE_LENGTH_PROPERTY to 160)
                 // language=kotlin
                 .isFormattedAs(
                     """

@@ -101,6 +101,26 @@ class CollapseEnumEntriesRuleTest {
                 )
         }
 
+        @Test
+        fun `enum implementing interface with simple entries`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |enum class Status : Serializable {
+                |    ACTIVE,
+                |    INACTIVE
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |enum class Status : Serializable {
+                    |    ACTIVE, INACTIVE
+                    |}
+                    """.trimMargin()
+                )
+        }
     }
 
     @Nested

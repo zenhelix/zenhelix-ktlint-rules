@@ -126,6 +126,33 @@ class CollapseShortKdocRuleTest {
         }
 
         @Test
+        fun `KDoc with @throws tag`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |/**
+                | * @throws IllegalArgumentException if invalid
+                | */
+                |fun foo() {}
+                """.trimMargin()
+            ).hasNoLintViolations()
+        }
+
+        @Test
+        fun `KDoc with @since tag`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |/**
+                | * Some description
+                | * @since 1.0
+                | */
+                |fun foo() {}
+                """.trimMargin()
+            ).hasNoLintViolations()
+        }
+
+        @Test
         fun `KDoc with empty content lines`() {
             // language=kotlin
             ruleAssertThat(

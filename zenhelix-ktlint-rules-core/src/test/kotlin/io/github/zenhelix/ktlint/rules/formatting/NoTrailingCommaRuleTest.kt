@@ -128,6 +128,41 @@ class NoTrailingCommaRuleTest {
                     """.trimMargin()
                 )
         }
+        @Test
+        fun `trailing comma in collection literal`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = listOf(1, 2, 3,)
+                """.trimMargin()
+            )
+                .hasLintViolation(1, 23, violationMessage)
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |val x = listOf(1, 2, 3)
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `trailing comma in annotation parameters`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |@Suppress("UNCHECKED_CAST",)
+                |fun foo() {}
+                """.trimMargin()
+            )
+                .hasLintViolation(1, 27, violationMessage)
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |@Suppress("UNCHECKED_CAST")
+                    |fun foo() {}
+                    """.trimMargin()
+                )
+        }
     }
 
     @Nested

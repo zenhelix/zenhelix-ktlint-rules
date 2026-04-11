@@ -163,5 +163,122 @@ class AlignWhenBranchArrowRuleTest {
                 """.trimMargin()
             ).hasNoLintViolations()
         }
+
+        @Test
+        fun `single entry when`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = when {
+                |    condition -> "a"
+                |}
+                """.trimMargin()
+            ).hasNoLintViolations()
+        }
+
+        @Test
+        fun `already aligned arrows with enum values`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = when (color) {
+                |    Color.RED   -> "red"
+                |    Color.GREEN -> "green"
+                |    Color.BLUE  -> "blue"
+                |}
+                """.trimMargin()
+            ).hasNoLintViolations()
+        }
+    }
+
+    @Nested
+    inner class `edge cases` {
+
+        @Test
+        fun `arrows with is-checks of different length`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = when (obj) {
+                |    is String -> "string"
+                |    is Int -> "int"
+                |    is LongClassName -> "long"
+                |    else -> "other"
+                |}
+                """.trimMargin()
+            )
+                .hasLintViolations(
+                    LintViolation(2, 14, violationMessage),
+                    LintViolation(3, 11, violationMessage),
+                    LintViolation(5, 9, violationMessage),
+                )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |val x = when (obj) {
+                    |    is String        -> "string"
+                    |    is Int           -> "int"
+                    |    is LongClassName -> "long"
+                    |    else             -> "other"
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `arrows with range checks`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = when (n) {
+                |    in 1..10 -> "small"
+                |    in 11..100 -> "medium"
+                |    else -> "large"
+                |}
+                """.trimMargin()
+            )
+                .hasLintViolations(
+                    LintViolation(2, 13, violationMessage),
+                    LintViolation(4, 9, violationMessage),
+                )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |val x = when (n) {
+                    |    in 1..10   -> "small"
+                    |    in 11..100 -> "medium"
+                    |    else       -> "large"
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `arrows with enum value checks`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |val x = when (color) {
+                |    Color.RED -> "red"
+                |    Color.GREEN -> "green"
+                |    Color.BLUE -> "blue"
+                |}
+                """.trimMargin()
+            )
+                .hasLintViolations(
+                    LintViolation(2, 14, violationMessage),
+                    LintViolation(4, 15, violationMessage),
+                )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |val x = when (color) {
+                    |    Color.RED   -> "red"
+                    |    Color.GREEN -> "green"
+                    |    Color.BLUE  -> "blue"
+                    |}
+                    """.trimMargin()
+                )
+        }
     }
 }

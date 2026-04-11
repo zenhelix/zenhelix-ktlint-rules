@@ -59,6 +59,98 @@ class ExpandLongLambdaRuleTest {
     }
 
     @Nested
+    inner class `should expand additional cases` {
+
+        @Test
+        fun `lambda with arrow and parameter exceeding 160 chars`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test() {
+                |    val resultOfOperation = someService.processDataWithConfiguration(configurationParameterName = { parameterValue -> transformAndValidateTheParameterValue(parameterValue) })
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun test() {
+                    |    val resultOfOperation = someService.processDataWithConfiguration(configurationParameterName = { parameterValue ->
+                    |        transformAndValidateTheParameterValue(parameterValue)
+                    |    })
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `nested lambda exceeding limit expands outer`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test() {
+                |    val resultVariable = someObject.outerMethodCallWithLongName(parameterName = { innerObject.innerMethodCallWithLongName { it.transformationCallHere() } })
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun test() {
+                    |    val resultVariable = someObject.outerMethodCallWithLongName(parameterName = {
+                    |        innerObject.innerMethodCallWithLongName { it.transformationCallHere() }
+                    |    })
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `lambda with destructuring exceeding limit`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test() {
+                |    val longVariableName = someService.executeOperationWithCallbackHandler(handlerParam = { (firstComponent, secondComponent) -> processComponents(firstComponent, secondComponent) })
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun test() {
+                    |    val longVariableName = someService.executeOperationWithCallbackHandler(handlerParam = { (firstComponent, secondComponent) ->
+                    |        processComponents(firstComponent, secondComponent)
+                    |    })
+                    |}
+                    """.trimMargin()
+                )
+        }
+
+        @Test
+        fun `lambda in chained call exceeding limit`() {
+            // language=kotlin
+            ruleAssertThat(
+                """
+                |fun test() {
+                |    val longVariableNameForTesting = someObject.firstMethodCall().secondMethodCall().thirdMethodCallWithLambda { reallyLongExpressionBodyThatExceedsTheLimit() }
+                |}
+                """.trimMargin()
+            )
+                // language=kotlin
+                .isFormattedAs(
+                    """
+                    |fun test() {
+                    |    val longVariableNameForTesting = someObject.firstMethodCall().secondMethodCall().thirdMethodCallWithLambda {
+                    |        reallyLongExpressionBodyThatExceedsTheLimit()
+                    |    }
+                    |}
+                    """.trimMargin()
+                )
+        }
+    }
+
+    @Nested
     inner class `should not expand` {
 
         @Test

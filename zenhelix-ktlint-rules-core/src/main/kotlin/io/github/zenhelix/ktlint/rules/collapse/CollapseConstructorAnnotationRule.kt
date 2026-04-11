@@ -47,10 +47,10 @@ public class CollapseConstructorAnnotationRule : ZenhelixRule(
         val primaryConstructor = node.findChildByType(KtNodeTypes.PRIMARY_CONSTRUCTOR) ?: return
 
         // Only when constructor has annotations in its modifier list
-        val modifierList = primaryConstructor.findChildByType(KtNodeTypes.MODIFIER_LIST)
-        val hasAnnotation = modifierList?.getChildren(null)?.any {
+        val modifierList = primaryConstructor.findChildByType(KtNodeTypes.MODIFIER_LIST) ?: return
+        val hasAnnotation = modifierList.getChildren(null).any {
             it.elementType == KtNodeTypes.ANNOTATION_ENTRY
-        } ?: false
+        }
         if (!hasAnnotation) return
 
         // Find whitespace between class header and PRIMARY_CONSTRUCTOR
@@ -69,9 +69,9 @@ public class CollapseConstructorAnnotationRule : ZenhelixRule(
 
             // Collapse any newlines within PRIMARY_CONSTRUCTOR's modifier list
             // (e.g. newline between @PublishedApi and internal)
-            modifierList?.getChildren(null)
-                ?.filter { it.elementType == TokenType.WHITE_SPACE && it.text.contains('\n') }
-                ?.forEach { ws -> (ws as LeafPsiElement).rawReplaceWithText(" ") }
+            modifierList.getChildren(null)
+                .filter { it.elementType == TokenType.WHITE_SPACE && it.text.contains('\n') }
+                .forEach { ws -> (ws as LeafPsiElement).rawReplaceWithText(" ") }
         }
     }
 }

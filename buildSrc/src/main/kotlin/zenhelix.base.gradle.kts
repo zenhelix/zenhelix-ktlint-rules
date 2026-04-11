@@ -20,8 +20,8 @@ kotlin {
 
     compilerOptions {
         jvmTarget.set(JvmTarget.fromTarget(jdkVersion.toString()))
-        languageVersion.set(KotlinVersion.KOTLIN_2_1)
-        apiVersion.set(KotlinVersion.KOTLIN_2_1)
+        languageVersion.set(KotlinVersion.KOTLIN_2_3)
+        apiVersion.set(KotlinVersion.KOTLIN_2_3)
         freeCompilerArgs.addAll("-Xjsr305=strict")
     }
 }
@@ -36,5 +36,4 @@ dependencies {
     testImplementation(platform(libs.findLibrary("junit-bom").get()))
     testImplementation(libs.findLibrary("junit-jupiter").get())
     testRuntimeOnly(libs.findLibrary("junit-platform-launcher").get())
-    testImplementation(libs.findLibrary("assertj-core").get())
 }

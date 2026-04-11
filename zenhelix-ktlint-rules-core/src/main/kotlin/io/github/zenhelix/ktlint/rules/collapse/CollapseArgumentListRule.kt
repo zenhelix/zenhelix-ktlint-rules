@@ -5,7 +5,6 @@ import com.pinterest.ktlint.rule.engine.core.api.RuleId
 import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collapseParenthesizedWhitespace
 import io.github.zenhelix.ktlint.rules.fitsOnOneLine
@@ -52,9 +51,9 @@ public class CollapseArgumentListRule : ZenhelixRule(
         // Single-argument lists have no readability benefit from wrapping,
         // so allow collapsing up to HARD_MAX. Multi-arg lists use COLLAPSE_MAX.
         val maxLength = if (args.size == 1) {
-            LineLengthSettings.HARD_MAX_LINE_LENGTH
+            lineLengthSettings.hard
         } else {
-            LineLengthSettings.COLLAPSE_MAX_LINE_LENGTH
+            lineLengthSettings.collapse
         }
         if (!node.fitsOnOneLine(collapsedText, maxLength)) return
 

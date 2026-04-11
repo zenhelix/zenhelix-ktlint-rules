@@ -8,7 +8,6 @@ import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import io.github.zenhelix.ktlint.rules.INDENT
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.findBlock
 import io.github.zenhelix.ktlint.rules.hasNewlineInDirectChildren
@@ -51,7 +50,7 @@ public class ExpandLongLambdaRule : ZenhelixRule(
         val prefixLength = lbrace.linePrefix().length
         val lineSuffix = node.textAfterNodeOnSameLine()
         val lineLength = prefixLength + node.textLength + lineSuffix.length
-        if (lineLength <= LineLengthSettings.HARD_MAX_LINE_LENGTH) return
+        if (lineLength <= lineLengthSettings.hard) return
 
         val baseIndent = lbrace.lineIndent()
         val bodyIndent = baseIndent + INDENT

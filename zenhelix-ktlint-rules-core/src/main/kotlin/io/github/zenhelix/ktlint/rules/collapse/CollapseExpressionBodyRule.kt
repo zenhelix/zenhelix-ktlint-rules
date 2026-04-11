@@ -9,7 +9,6 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
 import io.github.zenhelix.ktlint.rules.INDENT
 import io.github.zenhelix.ktlint.rules.WHITESPACE_REGEX
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collectWhitespace
 import io.github.zenhelix.ktlint.rules.lineIndent
@@ -76,7 +75,7 @@ public class CollapseExpressionBodyRule : ZenhelixRule(
 
         val eqLinePrefix = eq.linePrefix()
         val isMultilineExpression = expression.text.contains('\n')
-        val maxLength = LineLengthSettings.HARD_MAX_LINE_LENGTH
+        val maxLength = lineLengthSettings.hard
 
         // Try 1: collapse ENTIRE multiline expression to one line (e.g., elvis `expr ?: fallback`)
         if (isMultilineExpression && tryCollapseEntireExpression(eqLinePrefix, expression, wsAfterEq, emit)) {
@@ -112,7 +111,7 @@ public class CollapseExpressionBodyRule : ZenhelixRule(
 
         val collapsedText = expression.text.replace(WHITESPACE_REGEX, " ")
         val fullLength = eqLinePrefix.length + "= ".length + collapsedText.length
-        if (fullLength > LineLengthSettings.HARD_MAX_LINE_LENGTH) return false
+        if (fullLength > lineLengthSettings.hard) return false
 
         emitAndCorrect(emit, wsAfterEq.startOffset, "Expression body should start on the same line as '='") {
             (wsAfterEq as LeafPsiElement).rawReplaceWithText(" ")

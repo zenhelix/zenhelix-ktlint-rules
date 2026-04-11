@@ -7,7 +7,6 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.linePrefix
 import io.github.zenhelix.ktlint.rules.textAfterNodeOnSameLine
@@ -55,7 +54,7 @@ public class CollapseSupertypeListRule : ZenhelixRule(
         val textAfterSupertype = node.textAfterNodeOnSameLine()
         val collapsedLength = colonLinePrefix.length + ": ".length + supertypeText.length + textAfterSupertype.length
 
-        if (collapsedLength > LineLengthSettings.COLLAPSE_MAX_LINE_LENGTH) return
+        if (collapsedLength > lineLengthSettings.collapse) return
 
         emitAndCorrect(emit, wsBefore.startOffset, "Supertype list fits on the same line as class declaration") {
             (wsBefore as LeafPsiElement).rawReplaceWithText(" ")

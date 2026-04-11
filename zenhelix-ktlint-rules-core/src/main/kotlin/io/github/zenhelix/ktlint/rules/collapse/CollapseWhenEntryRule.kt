@@ -9,7 +9,6 @@ import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.lexer.KtTokens
 import io.github.zenhelix.ktlint.rules.INDENT
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collectWhitespace
 import io.github.zenhelix.ktlint.rules.columnOf
@@ -77,7 +76,7 @@ public class CollapseWhenEntryRule : ZenhelixRule(
     ) {
         val arrowColumn = arrow.columnOf()
         val collapsedLength = arrowColumn + "-> ".length + statementText.length
-        if (collapsedLength > LineLengthSettings.STANDARD_MAX_LINE_LENGTH) return
+        if (collapsedLength > lineLengthSettings.standard) return
 
         emitAndCorrect(emit, body.startOffset, "When entry body with single expression does not need braces") {
             replaceBlockWithStatementNode(wsAfterArrow, body, statement)
@@ -95,7 +94,7 @@ public class CollapseWhenEntryRule : ZenhelixRule(
         val firstLine = statementText.substringBefore('\n')
         val arrowColumn = arrow.columnOf()
         val collapsedFirstLineLength = arrowColumn + "-> ".length + firstLine.length
-        if (collapsedFirstLineLength > LineLengthSettings.STANDARD_MAX_LINE_LENGTH) return
+        if (collapsedFirstLineLength > lineLengthSettings.standard) return
 
         if (hasMultilineWhenEntries(statement)) return
 

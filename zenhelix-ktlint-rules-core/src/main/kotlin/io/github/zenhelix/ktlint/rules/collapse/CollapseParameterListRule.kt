@@ -7,7 +7,6 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.lexer.KtTokens
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.PARAM_TOKEN_SET
 import io.github.zenhelix.ktlint.rules.collapseParenthesizedWhitespace
@@ -59,9 +58,9 @@ public class CollapseParameterListRule : ZenhelixRule(
         val collapsedText = "($collapsedParams)"
 
         val maxLength = when {
-            hasFunctionalParameter(params) -> LineLengthSettings.COLLAPSE_FUNCTIONAL_MAX_LINE_LENGTH
-            node.isBodylessFunction() -> LineLengthSettings.HARD_MAX_LINE_LENGTH
-            else -> LineLengthSettings.COLLAPSE_MAX_LINE_LENGTH
+            hasFunctionalParameter(params) -> lineLengthSettings.collapseFunctional
+            node.isBodylessFunction() -> lineLengthSettings.hard
+            else -> lineLengthSettings.collapse
         }
         if (!node.fitsOnOneLine(collapsedText, maxLength)) return
 

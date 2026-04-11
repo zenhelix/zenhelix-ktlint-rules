@@ -10,7 +10,6 @@ import org.jetbrains.kotlin.com.intellij.psi.tree.TokenSet
 import org.jetbrains.kotlin.lexer.KtTokens
 import io.github.zenhelix.ktlint.rules.INDENT
 import io.github.zenhelix.ktlint.rules.WHITESPACE_REGEX
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collectWhitespace
 import io.github.zenhelix.ktlint.rules.lineIndent
@@ -78,7 +77,7 @@ public class CollapseIfConditionRule : ZenhelixRule(
         val collapsedLine = ifPrefix + collapsedCondition + ")"
         val suffixLength = estimateSuffix(rpar)
 
-        if (collapsedLine.length + suffixLength <= LineLengthSettings.HARD_MAX_LINE_LENGTH) {
+        if (collapsedLine.length + suffixLength <= lineLengthSettings.hard) {
             collapseCondition(node, lpar, rpar, condition, emit)
         } else {
             breakConditionAtOperators(node, lpar, rpar, condition, emit)

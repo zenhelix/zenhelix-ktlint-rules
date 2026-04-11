@@ -7,7 +7,6 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.columnOf
 import io.github.zenhelix.ktlint.rules.findBlock
@@ -66,7 +65,7 @@ public class CollapseShortLambdaRule : ZenhelixRule(
         val collapsedText = buildCollapsedText(node, lbrace, statementText)
         val column = lbrace.columnOf()
         val suffixLength = rbrace.suffixLengthAfterCollapse()
-        if (column + collapsedText.length + suffixLength > LineLengthSettings.STANDARD_MAX_LINE_LENGTH) return
+        if (column + collapsedText.length + suffixLength > lineLengthSettings.standard) return
 
         emitAndCorrect(emit, node.startOffset, "Short lambda fits on a single line") {
             collapseWhitespace(node, lbrace, rbrace)

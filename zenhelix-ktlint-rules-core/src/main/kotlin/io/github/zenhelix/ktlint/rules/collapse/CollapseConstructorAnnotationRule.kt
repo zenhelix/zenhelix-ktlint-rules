@@ -6,7 +6,6 @@ import org.jetbrains.kotlin.KtNodeTypes
 import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.linePrefix
 
@@ -61,7 +60,7 @@ public class CollapseConstructorAnnotationRule : ZenhelixRule(
         // Compute the collapsed line length to ensure it fits within the limit
         val lineBeforeWs = wsBeforeConstructor.linePrefix()
         val constructorSingleLine = primaryConstructor.text.replace(Regex("[ \t]*\n[ \t]*"), " ")
-        if (lineBeforeWs.length + 1 + constructorSingleLine.length > LineLengthSettings.HARD_MAX_LINE_LENGTH) return
+        if (lineBeforeWs.length + 1 + constructorSingleLine.length > lineLengthSettings.hard) return
 
         emitAndCorrect(emit, wsBeforeConstructor.startOffset, "Primary constructor annotation should be on the same line as the class declaration") {
             // Collapse whitespace before PRIMARY_CONSTRUCTOR to a single space

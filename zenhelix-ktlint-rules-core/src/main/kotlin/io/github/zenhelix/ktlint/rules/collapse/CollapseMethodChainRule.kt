@@ -7,7 +7,6 @@ import org.jetbrains.kotlin.com.intellij.lang.ASTNode
 import org.jetbrains.kotlin.com.intellij.psi.TokenType
 import org.jetbrains.kotlin.com.intellij.psi.impl.source.tree.LeafPsiElement
 import org.jetbrains.kotlin.lexer.KtTokens
-import io.github.zenhelix.ktlint.rules.LineLengthSettings
 import io.github.zenhelix.ktlint.rules.ZenhelixRule
 import io.github.zenhelix.ktlint.rules.collectWhitespace
 import io.github.zenhelix.ktlint.rules.lineIndent
@@ -96,7 +95,7 @@ public class CollapseMethodChainRule : ZenhelixRule(
         val methodFirstLine = afterDot.text.substringBefore('\n', afterDot.text)
 
         val collapsedLength = receiverPrefix.length + receiverLastLine.length + dotText.length + methodFirstLine.length
-        if (collapsedLength > LineLengthSettings.HARD_MAX_LINE_LENGTH) return
+        if (collapsedLength > lineLengthSettings.hard) return
 
         val dotIndent = wsBefore.text.substringAfterLast('\n')
         val receiverIndent = receiver.lineIndent()

@@ -6,7 +6,7 @@ pluginManagement {
     }
 
     plugins {
-        id("io.github.zenhelix.maven-central-publish") version "0.11.3"
+        id("io.github.zenhelix.maven-central-publish") version "0.11.4"
     }
 }
 

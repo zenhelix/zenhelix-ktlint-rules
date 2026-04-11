@@ -4,7 +4,9 @@ import com.pinterest.ktlint.rule.engine.core.api.AutocorrectDecision
 import com.pinterest.ktlint.rule.engine.core.api.Rule
 import com.pinterest.ktlint.rule.engine.core.api.RuleAutocorrectApproveHandler
 import com.pinterest.ktlint.rule.engine.core.api.RuleId
+import com.pinterest.ktlint.rule.engine.core.api.editorconfig.EditorConfig
 import com.pinterest.ktlint.rule.engine.core.api.editorconfig.EditorConfigProperty
+import com.pinterest.ktlint.rule.engine.core.api.editorconfig.MAX_LINE_LENGTH_PROPERTY
 
 public abstract class ZenhelixRule(
     ruleId: RuleId,
@@ -14,12 +16,21 @@ public abstract class ZenhelixRule(
     ruleId = ruleId,
     about = ZENHELIX_ABOUT,
     visitorModifiers = visitorModifiers,
-    usesEditorConfigProperties = usesEditorConfigProperties,
+    usesEditorConfigProperties = usesEditorConfigProperties + MAX_LINE_LENGTH_PROPERTY,
 ),
     RuleAutocorrectApproveHandler {
 
     protected var lineLengthSettings: LineLengthSettings = LineLengthSettings()
         private set
+
+    override fun beforeFirstNode(editorConfig: EditorConfig) {
+        val maxLineLength = editorConfig[MAX_LINE_LENGTH_PROPERTY]
+        lineLengthSettings = if (maxLineLength == Int.MAX_VALUE) {
+            LineLengthSettings()
+        } else {
+            LineLengthSettings(maxLineLength)
+        }
+    }
 
     protected inline fun emitAndCorrect(
         emit: (offset: Int, errorMessage: String, canBeAutoCorrected: Boolean) -> AutocorrectDecision,

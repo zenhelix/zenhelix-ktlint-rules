@@ -6,10 +6,7 @@ on:
 
 jobs:
   release:
-    uses: zenhelix/ci-workflows/.github/workflows/release-github.yml@v1
-
-  publish:
-    uses: zenhelix/ci-workflows/.github/workflows/release-publish-gradle.yml@v1
+    uses: zenhelix/ci-workflows/.github/workflows/kotlin-library-release.yml@v2
     with:
       java-version: '21'
       publish-command: './gradlew publish -Pversion=''${{ github.ref_name }}'''
